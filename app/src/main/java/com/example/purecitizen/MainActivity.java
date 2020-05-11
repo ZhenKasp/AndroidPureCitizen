@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
 import android.view.ViewGroup;
@@ -152,27 +153,40 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
-        setInitialData();
-        posts_get();
+//        setInitialData();
+//        posts_get();
 
 
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.list);
-        // создаем адаптер
-        DataAdapter adapter = new DataAdapter(this, posts);
-        // устанавливаем для списка адаптер
-        recyclerView.setAdapter(adapter);
+//        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.list);
+//        // создаем адаптер
+//        DataAdapter adapter = new DataAdapter(this, posts);
+//        // устанавливаем для списка адаптер
+//        recyclerView.setAdapter(adapter);
 
-
-
-
-        String token = getIntent().getStringExtra("token");
-        if (token != null) {
-            Log.d("token", token);
-            final_token = token;
-        } else {
-            String error = getIntent().getStringExtra("error");
-            Log.e("Something wrong", error);
+        try {
+            String token = getIntent().getStringExtra("token");
+            if (token != null) {
+                Log.d("token", token);
+                final_token = token;
+            } else {
+                String error = getIntent().getStringExtra("error");
+                Log.e("Something wrong", error);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                drawer.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+
     }
 
 
