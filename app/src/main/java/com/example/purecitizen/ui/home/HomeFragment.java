@@ -3,13 +3,16 @@ package com.example.purecitizen.ui.home;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,10 +45,8 @@ public class HomeFragment extends Fragment {
 
     private Context context;
 
-    private HomeViewModel homeViewModel;
-
     List<Post> posts = new ArrayList<>();
-    private String final_token;
+    protected String final_token;
 
     public class Post {
 
@@ -135,23 +136,21 @@ public class HomeFragment extends Fragment {
             if (token != null) {
                 Log.d("token", token);
                 final_token = token;
-                setInitialData();
+
                 posts_get();
-                RecyclerView recyclerView = root.findViewById(R.id.list);
-                DataAdapter adapter = new DataAdapter(getActivity(), posts);
-                recyclerView.setAdapter(adapter);
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
+                setInitialData();
+
             } else {
                 String error = getActivity().getIntent().getStringExtra("error");
-                Log.e("Something wrong", error);
+                Toast toast = Toast.makeText(getActivity().getApplicationContext(),
+                        error.toString(), Toast.LENGTH_LONG);
+                LinearLayout toastContainer = (LinearLayout) toast.getView();
+                toastContainer.setBackgroundColor(Color.RED);
+                toast.show();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
-
-
         return root;
 
     }
@@ -167,7 +166,6 @@ public class HomeFragment extends Fragment {
         posts.add(new Post ("WTF", "example", R.drawable.image5));
         posts.add(new Post ("WTF", "example", R.drawable.image6));
         posts.add(new Post ("WTF", "example", R.drawable.image7));
-        posts.add(new Post ("WTF", "example", R.drawable.gif1));
 
 
     }
@@ -183,9 +181,6 @@ public class HomeFragment extends Fragment {
                         public void onResponse(String response) {
                             Log.d("response=", response);
                             try {
-
-
-
                                 JSONObject json = new JSONObject(response);
                                 Log.d("json=", json.toString());
                                 JSONArray json_posts = json.getJSONArray("post");
@@ -199,6 +194,12 @@ public class HomeFragment extends Fragment {
                                     Log.d("title=", title);
                                     Log.d("body=", body);
                                     posts.add(new Post (title, body, R.drawable.image8));
+
+                                    RecyclerView recyclerView = getActivity().findViewById(R.id.list);
+                                    DataAdapter adapter = new DataAdapter(getActivity(), posts);
+                                    recyclerView.setAdapter(adapter);
+                                    recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
