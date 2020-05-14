@@ -158,13 +158,13 @@ public class HomeFragment extends Fragment {
     }
 
     private void setInitialData(){
-        posts.add(new Post ("WTF", "if this post does not exist then there are no others", R.drawable.image1));
-        posts.add(new Post ("WTF", "example", R.drawable.image2));
-        posts.add(new Post ("WTF", "example", R.drawable.image3));
-        posts.add(new Post ("WTF", "example", R.drawable.image4));
-        posts.add(new Post ("WTF", "example", R.drawable.image5));
-        posts.add(new Post ("WTF", "example", R.drawable.image6));
-        posts.add(new Post ("WTF", "example", R.drawable.image7));
+        posts.add(new Post ("1", "12adadadasew rw w rqwwrrdadaggda3", R.drawable.image1));
+        posts.add(new Post ("2", "45asfasfaf aw dafdfaf fdfadf6", R.drawable.image2));
+        posts.add(new Post ("3", "examzczczcrxgafdagdadfafdple", R.drawable.image3));
+        posts.add(new Post ("4", "examagfga wr gaadgasdadafple", R.drawable.image4));
+        posts.add(new Post ("5", "exaafasdfawra sfsad fafdfmple", R.drawable.image5));
+        posts.add(new Post ("6", "exaasfaswra sffasddasdfaetwample", R.drawable.image6));
+        posts.add(new Post ("7", "exasdafadfadfad dfafdwer adsfmple", R.drawable.image7));
 
 
     }
@@ -192,7 +192,7 @@ public class HomeFragment extends Fragment {
                                     String body = json_post.getString("body");
                                     Log.d("title=", title);
                                     Log.d("body=", body);
-                                    posts.add(new Post (title, body, R.drawable.image8));
+                                    posts.add(new Post (title, body, R.drawable.gif2));
 
                                     RecyclerView recyclerView = getActivity().findViewById(R.id.list);
                                     DataAdapter adapter = new DataAdapter(getActivity(), posts);

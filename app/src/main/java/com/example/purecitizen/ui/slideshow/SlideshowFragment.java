@@ -1,15 +1,12 @@
 package com.example.purecitizen.ui.slideshow;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.Picture;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,10 +18,8 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.android.volley.AuthFailureError;
@@ -34,18 +29,18 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.purecitizen.LoginActivity;
+import com.bumptech.glide.Glide;
 import com.example.purecitizen.MainActivity;
 import com.example.purecitizen.R;
 import com.example.purecitizen.ui.home.HomeFragment;
-import com.example.purecitizen.ui.home.HomeViewModel;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static android.app.Activity.RESULT_OK;
 
 public class SlideshowFragment extends Fragment  {
 
@@ -53,6 +48,7 @@ public class SlideshowFragment extends Fragment  {
     private static final int CAMERA_REQUEST = 1888;
     private ImageView imageView;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
+    static final int GALLERY_REQUEST = 1;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -60,20 +56,24 @@ public class SlideshowFragment extends Fragment  {
         final EditText et_body = getActivity().findViewById(R.id.et_body);
         final EditText et_title = getActivity().findViewById(R.id.et_title);
         final Button btn_submit = root.findViewById(R.id.btn_submit);
-        final ImageButton image = root.findViewById(R.id.btn_image);
+        final ImageButton camera = root.findViewById(R.id.btn_image);
+        final ImageView gallery = root.findViewById(R.id.iv_image);
 
-        image.setOnClickListener(new View.OnClickListener() {
+        camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
-                {
-                    requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
-                }
-                else
-                {
-                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
-                }
+                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(takePicture, 0);
+            }
+        });
+
+
+        gallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent pickPhoto = new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(pickPhoto , 1);
             }
         });
 
@@ -111,33 +111,57 @@ public class SlideshowFragment extends Fragment  {
         return root;
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
-    {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == MY_CAMERA_PERMISSION_CODE)
-        {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-            {
-                Toast.makeText(getContext(), "camera permission granted", Toast.LENGTH_LONG).show();
-                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST);
-            }
-            else
-            {
-                Toast.makeText(getContext(), "camera permission denied", Toast.LENGTH_LONG).show();
-            }
-        }
-    }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+//    {
+//        Bitmap bitmap = null;
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        if (requestCode == MY_CAMERA_PERMISSION_CODE)
+//        {
+//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+//            {
+//                Toast.makeText(getContext(), "camera permission granted", Toast.LENGTH_LONG).show();
+//                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+//                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+//            }
+//            else
+//            {
+//                Toast.makeText(getContext(), "camera permission denied", Toast.LENGTH_LONG).show();
+//            }
+//        } else if (requestCode == GALLERY_REQUEST) {
+//            if(resultCode == RESULT_OK){
+//                Uri selectedImage = imageReturnedIntent.getData();
+//                try {
+//                    bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//                imageView.setImageBitmap(bitmap);
+//            }
+//        }
+//
+//        if (requestCode == GALLERY_REQUEST)
+//    }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK)
-        {
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            final ImageButton image = getActivity().findViewById(R.id.btn_image);
-            image.setImageBitmap(photo);
+    public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+        super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+        switch(requestCode) {
+            case 0:
+                if(resultCode == RESULT_OK){
+                    Uri selectedImage = imageReturnedIntent.getData();
+                    final ImageButton camera = getActivity().findViewById(R.id.btn_image);
+                    camera.setImageURI(selectedImage);
+                }
+
+                break;
+            case 1:
+                if(resultCode == RESULT_OK){
+                    Uri selectedImage = imageReturnedIntent.getData();
+                    final ImageView gallery = getActivity().findViewById(R.id.iv_image);
+                    gallery.setImageURI(selectedImage);
+                }
+                break;
         }
     }
 

@@ -7,4 +7,5 @@
     <color name="hint">#CDFFFFFF</color>
     <color name="black">#000000</color>
     <color name="blue">#283593</color>
+    <color name="gray">#AAAAAA</color>
 </resources>
