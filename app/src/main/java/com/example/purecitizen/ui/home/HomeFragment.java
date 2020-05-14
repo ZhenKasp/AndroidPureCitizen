@@ -173,7 +173,7 @@ public class HomeFragment extends Fragment {
     }
     private void posts_get() {
         RequestQueue queue = Volley.newRequestQueue(getActivity());
-        String url = "http://192.168.100.3:3000/api/v1/posts/";
+        String url = "http://192.168.100.4:3000/api/v1/posts/";
         // Request a string response from the provided URL.
         Log.d("url=", url);
         try {

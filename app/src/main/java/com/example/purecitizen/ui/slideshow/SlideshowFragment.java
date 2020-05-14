@@ -55,7 +55,6 @@ public class SlideshowFragment extends Fragment implements View.OnClickListener 
         final EditText et_title = getActivity().findViewById(R.id.et_title);
         final Button btn_submit = root.findViewById(R.id.btn_submit);
         //final ImageButton btn_image = root.findViewById(R.id.btn_image);
-        //final EditText btn_confirm = root.findViewById(R.id.btn_submit);
 
         btn_submit.setOnClickListener(this);
 
@@ -69,27 +68,20 @@ public class SlideshowFragment extends Fragment implements View.OnClickListener 
         switch (v.getId()) {
             case R.id.btn_submit:
                 try {
-                    FragmentTransaction fr = getFragmentManager().beginTransaction();
-                    fr.replace(R.id.nav_host_fragment, new HomeFragment());
-                    fr.commit();
-//                    final EditText et_body = getActivity().findViewById(R.id.et_body);
-//                    final EditText et_title = getActivity().findViewById(R.id.et_title);
-//                    Log.d("find error","1");
-//                    if (et_title.getText().toString() != null && et_body.getText().toString() != null) {
-//                        //create_post();
-//                        Log.d("find error","2");
-//                        if (error_response == null){
-//                            Toast toast = Toast.makeText(getActivity().getApplicationContext(),
-//                                    "Post successfully created", Toast.LENGTH_LONG);
-//                            LinearLayout toastContainer = (LinearLayout) toast.getView();
-//                            toastContainer.setBackgroundColor(Color.GREEN);
-//                            toast.show();
-//                            Log.d("find error","3");
-//                            go_to_home_fragment();
-//                            Log.d("find error","4");
-//                        }
+                    final EditText et_body = getActivity().findViewById(R.id.et_body);
+                    final EditText et_title = getActivity().findViewById(R.id.et_title);
+                    if (et_title.getText().toString() != null && et_body.getText().toString() != null) {
+                        create_post();
+                        if (error_response == null){
+                            Toast toast = Toast.makeText(getActivity().getApplicationContext(),
+                                    "Post successfully created", Toast.LENGTH_LONG);
+                            LinearLayout toastContainer = (LinearLayout) toast.getView();
+                            toastContainer.setBackgroundColor(Color.GREEN);
+                            toast.show();
+                            go_to_home_fragment();
+                        }
                         break;
-//                   }
+                   }
                 } catch (Exception e) {
                     e.printStackTrace();
                     Toast toast = Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT);
@@ -107,7 +99,7 @@ public class SlideshowFragment extends Fragment implements View.OnClickListener 
         FragmentActivity root = getActivity();
         try {
             RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-            String URL = "http://192.168.100.3:3000/api/v1/posts/create/";
+            String URL = "http://192.168.100.4:3000/api/v1/posts/";
 
             JSONObject jsonBody = new JSONObject();
             final EditText et_body = getActivity().findViewById(R.id.et_body);
