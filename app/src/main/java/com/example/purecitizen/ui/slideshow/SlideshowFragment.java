@@ -1,6 +1,10 @@
 package com.example.purecitizen.ui.slideshow;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Picture;
 import android.os.Bundle;
@@ -12,10 +16,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -41,12 +47,12 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SlideshowFragment extends Fragment implements View.OnClickListener {
+public class SlideshowFragment extends Fragment  {
 
     String error_response = null;
-
-
-
+    private static final int CAMERA_REQUEST = 1888;
+    private ImageView imageView;
+    private static final int MY_CAMERA_PERMISSION_CODE = 100;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -54,34 +60,44 @@ public class SlideshowFragment extends Fragment implements View.OnClickListener 
         final EditText et_body = getActivity().findViewById(R.id.et_body);
         final EditText et_title = getActivity().findViewById(R.id.et_title);
         final Button btn_submit = root.findViewById(R.id.btn_submit);
-        //final ImageButton btn_image = root.findViewById(R.id.btn_image);
+        final ImageButton image = root.findViewById(R.id.btn_image);
 
-        btn_submit.setOnClickListener(this);
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
+                {
+                    requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
+                }
+                else
+                {
+                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
+                }
+            }
+        });
 
-        //create_post();
-
-        return root;
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.btn_submit:
+        btn_submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 try {
                     final EditText et_body = getActivity().findViewById(R.id.et_body);
                     final EditText et_title = getActivity().findViewById(R.id.et_title);
+
                     if (et_title.getText().toString() != null && et_body.getText().toString() != null) {
+
                         create_post();
+
                         if (error_response == null){
                             Toast toast = Toast.makeText(getActivity().getApplicationContext(),
                                     "Post successfully created", Toast.LENGTH_LONG);
                             LinearLayout toastContainer = (LinearLayout) toast.getView();
                             toastContainer.setBackgroundColor(Color.GREEN);
                             toast.show();
+
                             go_to_home_fragment();
                         }
-                        break;
-                   }
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     Toast toast = Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT);
@@ -89,10 +105,41 @@ public class SlideshowFragment extends Fragment implements View.OnClickListener 
                     toastContainer.setBackgroundColor(Color.RED);
                     toast.show();
                 }
-            default: break;
+            }
+        });
+
+        return root;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == MY_CAMERA_PERMISSION_CODE)
+        {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                Toast.makeText(getContext(), "camera permission granted", Toast.LENGTH_LONG).show();
+                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+            }
+            else
+            {
+                Toast.makeText(getContext(), "camera permission denied", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK)
+        {
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            final ImageButton image = getActivity().findViewById(R.id.btn_image);
+            image.setImageBitmap(photo);
+        }
+    }
 
 
     private void create_post() {

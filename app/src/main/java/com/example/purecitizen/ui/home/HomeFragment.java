@@ -157,10 +157,7 @@ public class HomeFragment extends Fragment {
 
     }
 
-
     private void setInitialData(){
-
-
         posts.add(new Post ("WTF", "if this post does not exist then there are no others", R.drawable.image1));
         posts.add(new Post ("WTF", "example", R.drawable.image2));
         posts.add(new Post ("WTF", "example", R.drawable.image3));
@@ -225,7 +222,4 @@ public class HomeFragment extends Fragment {
             Log.e("Some error", e.toString());
         }
     }
-
-
-
 }
