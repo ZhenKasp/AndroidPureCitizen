@@ -17,6 +17,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -171,7 +173,7 @@ public class HomeFragment extends Fragment {
     }
     private void posts_get() {
         RequestQueue queue = Volley.newRequestQueue(getActivity());
-        String url = "http://192.168.100.4:3000/api/v1/posts/";
+        String url = "http://192.168.100.3:3000/api/v1/posts/";
         // Request a string response from the provided URL.
         Log.d("url=", url);
         try {
@@ -223,4 +225,7 @@ public class HomeFragment extends Fragment {
             Log.e("Some error", e.toString());
         }
     }
+
+
+
 }

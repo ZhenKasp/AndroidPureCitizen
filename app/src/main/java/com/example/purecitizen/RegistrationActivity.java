@@ -134,7 +134,7 @@ public class RegistrationActivity extends AppCompatActivity {
 
         try {
             RequestQueue requestQueue = Volley.newRequestQueue(this);
-            String URL = "http://192.168.100.4:3000/api/v1/users/";
+            String URL = "http://192.168.100.3:3000/api/v1/users/";
 
             JSONObject jsonBody = new JSONObject();
 

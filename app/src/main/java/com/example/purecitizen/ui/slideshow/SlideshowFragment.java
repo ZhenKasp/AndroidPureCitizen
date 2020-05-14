@@ -32,6 +32,7 @@ import com.example.purecitizen.LoginActivity;
 import com.example.purecitizen.MainActivity;
 import com.example.purecitizen.R;
 import com.example.purecitizen.ui.home.HomeFragment;
+import com.example.purecitizen.ui.home.HomeViewModel;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,16 +44,15 @@ import java.util.Map;
 public class SlideshowFragment extends Fragment implements View.OnClickListener {
 
     String error_response = null;
-    EditText et_title;
-    EditText et_body;
+
 
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_slideshow, container, false);
-        final EditText et_title = root.findViewById(R.id.et_title);
-        final EditText et_body = root.findViewById(R.id.et_body);
+        final EditText et_body = getActivity().findViewById(R.id.et_body);
+        final EditText et_title = getActivity().findViewById(R.id.et_title);
         final Button btn_submit = root.findViewById(R.id.btn_submit);
         //final ImageButton btn_image = root.findViewById(R.id.btn_image);
         //final EditText btn_confirm = root.findViewById(R.id.btn_submit);
@@ -69,21 +69,30 @@ public class SlideshowFragment extends Fragment implements View.OnClickListener 
         switch (v.getId()) {
             case R.id.btn_submit:
                 try {
-                    if (et_title.getText() != null && et_body.getText() != null) {
-                        //create_post();
-                        if (error_response == null){
-                            Toast toast = Toast.makeText(getActivity().getApplicationContext(),
-                                    "Post successfully created", Toast.LENGTH_LONG);
-                            LinearLayout toastContainer = (LinearLayout) toast.getView();
-                            toastContainer.setBackgroundColor(Color.GREEN);
-                            toast.show();
-                            go_to_home_fragment();
-                        }
-
+                    FragmentTransaction fr = getFragmentManager().beginTransaction();
+                    fr.replace(R.id.nav_host_fragment, new HomeFragment());
+                    fr.commit();
+//                    final EditText et_body = getActivity().findViewById(R.id.et_body);
+//                    final EditText et_title = getActivity().findViewById(R.id.et_title);
+//                    Log.d("find error","1");
+//                    if (et_title.getText().toString() != null && et_body.getText().toString() != null) {
+//                        //create_post();
+//                        Log.d("find error","2");
+//                        if (error_response == null){
+//                            Toast toast = Toast.makeText(getActivity().getApplicationContext(),
+//                                    "Post successfully created", Toast.LENGTH_LONG);
+//                            LinearLayout toastContainer = (LinearLayout) toast.getView();
+//                            toastContainer.setBackgroundColor(Color.GREEN);
+//                            toast.show();
+//                            Log.d("find error","3");
+//                            go_to_home_fragment();
+//                            Log.d("find error","4");
+//                        }
                         break;
-                    }
+//                   }
                 } catch (Exception e) {
-                    Toast toast = Toast.makeText(getActivity(), "Invalid Title or Body!", Toast.LENGTH_SHORT);
+                    e.printStackTrace();
+                    Toast toast = Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT);
                     LinearLayout toastContainer = (LinearLayout) toast.getView();
                     toastContainer.setBackgroundColor(Color.RED);
                     toast.show();
@@ -93,56 +102,16 @@ public class SlideshowFragment extends Fragment implements View.OnClickListener 
     }
 
 
-    private boolean validateTitle(EditText title) {
-        try {
-            String titleInput = et_title.toString();
-            if(!titleInput.isEmpty()){
-                return true;
-            } else {
-                Toast toast = Toast.makeText(getActivity(), "Invalid Title!", Toast.LENGTH_SHORT);
-                LinearLayout toastContainer = (LinearLayout) toast.getView();
-                toastContainer.setBackgroundColor(Color.RED);
-                toast.show();
-                return false;
-            }
-        }catch (Exception e) {
-            Toast toast = Toast.makeText(getActivity(), "Invalid Title!", Toast.LENGTH_SHORT);
-            LinearLayout toastContainer = (LinearLayout) toast.getView();
-            toastContainer.setBackgroundColor(Color.RED);
-            toast.show();
-            return false;
-
-        }
-    }
-
-    private boolean validateBody(EditText body) {
-        try {
-            String bodyInput = et_body.toString();
-            if(!bodyInput.isEmpty()){
-                return true;
-            } else {
-                Toast toast = Toast.makeText(getActivity(), "Invalid Body!", Toast.LENGTH_SHORT);
-                LinearLayout toastContainer = (LinearLayout) toast.getView();
-                toastContainer.setBackgroundColor(Color.RED);
-                toast.show();
-                return false;
-            }
-        }catch (Exception e) {
-            Toast toast = Toast.makeText(getActivity(), "Invalid Body!", Toast.LENGTH_SHORT);
-            LinearLayout toastContainer = (LinearLayout) toast.getView();
-            toastContainer.setBackgroundColor(Color.RED);
-            toast.show();
-            return false;
-        }
-    }
 
     private void create_post() {
         FragmentActivity root = getActivity();
         try {
             RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-            String URL = "http://192.168.100.4:3000/api/v1/posts/create/";
+            String URL = "http://192.168.100.3:3000/api/v1/posts/create/";
 
             JSONObject jsonBody = new JSONObject();
+            final EditText et_body = getActivity().findViewById(R.id.et_body);
+            final EditText et_title = getActivity().findViewById(R.id.et_title);
 
             jsonBody.put("title", et_title.getText().toString());
             jsonBody.put("body", et_body.getText().toString());
@@ -187,12 +156,8 @@ public class SlideshowFragment extends Fragment implements View.OnClickListener 
     }
 
     private  void go_to_home_fragment() {
-        Fragment fragment = new Fragment();
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.nav_home, fragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
+        final FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.nav_host_fragment, new HomeFragment(), "NewFragmentTag");
+        ft.commit();
     }
-
 }

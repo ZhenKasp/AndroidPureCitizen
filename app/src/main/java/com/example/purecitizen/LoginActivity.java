@@ -97,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
 
         try {
             RequestQueue requestQueue = Volley.newRequestQueue(this);
-            String URL = "http://192.168.100.4:3000/api/v1/session/";
+            String URL = "http://192.168.100.3:3000/api/v1/session/";
 
             JSONObject jsonBody = new JSONObject();
 
