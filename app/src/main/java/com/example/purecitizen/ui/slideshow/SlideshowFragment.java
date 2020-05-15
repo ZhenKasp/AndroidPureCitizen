@@ -3,6 +3,7 @@ package com.example.purecitizen.ui.slideshow;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -49,6 +50,7 @@ public class SlideshowFragment extends Fragment  {
     private ImageView imageView;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
     static final int GALLERY_REQUEST = 1;
+    public Uri image_to_download;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -84,7 +86,7 @@ public class SlideshowFragment extends Fragment  {
                     final EditText et_body = getActivity().findViewById(R.id.et_body);
                     final EditText et_title = getActivity().findViewById(R.id.et_title);
 
-                    if (et_title.getText().toString() != null && et_body.getText().toString() != null) {
+                    if (et_title.getText().toString() != null && et_body.getText().toString() != null && image_to_download != null) {
 
                         create_post();
 
@@ -97,6 +99,11 @@ public class SlideshowFragment extends Fragment  {
 
                             go_to_home_fragment();
                         }
+                    } else {
+                        Toast toast = Toast.makeText(getActivity(),"Поля заполнены неправильно", Toast.LENGTH_LONG);
+                        LinearLayout toastContainer = (LinearLayout) toast.getView();
+                        toastContainer.setBackgroundColor(Color.RED);
+                        toast.show();
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -110,38 +117,6 @@ public class SlideshowFragment extends Fragment  {
 
         return root;
     }
-
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
-//    {
-//        Bitmap bitmap = null;
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        if (requestCode == MY_CAMERA_PERMISSION_CODE)
-//        {
-//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
-//            {
-//                Toast.makeText(getContext(), "camera permission granted", Toast.LENGTH_LONG).show();
-//                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-//                startActivityForResult(cameraIntent, CAMERA_REQUEST);
-//            }
-//            else
-//            {
-//                Toast.makeText(getContext(), "camera permission denied", Toast.LENGTH_LONG).show();
-//            }
-//        } else if (requestCode == GALLERY_REQUEST) {
-//            if(resultCode == RESULT_OK){
-//                Uri selectedImage = imageReturnedIntent.getData();
-//                try {
-//                    bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                imageView.setImageBitmap(bitmap);
-//            }
-//        }
-//
-//        if (requestCode == GALLERY_REQUEST)
-//    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
@@ -159,6 +134,7 @@ public class SlideshowFragment extends Fragment  {
                 if(resultCode == RESULT_OK){
                     Uri selectedImage = imageReturnedIntent.getData();
                     final ImageView gallery = getActivity().findViewById(R.id.iv_image);
+                    image_to_download = selectedImage;
                     gallery.setImageURI(selectedImage);
                 }
                 break;
@@ -178,6 +154,7 @@ public class SlideshowFragment extends Fragment  {
 
             jsonBody.put("title", et_title.getText().toString());
             jsonBody.put("body", et_body.getText().toString());
+            jsonBody.put("image", image_to_download);
 
             JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.POST, URL, jsonBody,
                     new Response.Listener<JSONObject>() {
