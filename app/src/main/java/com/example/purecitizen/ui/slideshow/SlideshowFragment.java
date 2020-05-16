@@ -1,12 +1,17 @@
 package com.example.purecitizen.ui.slideshow;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,23 +28,22 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+
+import com.android.volley.request.SimpleMultiPartRequest;
+
 import com.android.volley.toolbox.Volley;
-import com.bumptech.glide.Glide;
 import com.example.purecitizen.MainActivity;
 import com.example.purecitizen.R;
 import com.example.purecitizen.ui.home.HomeFragment;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -50,7 +54,7 @@ public class SlideshowFragment extends Fragment  {
     private ImageView imageView;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
     static final int GALLERY_REQUEST = 1;
-    public Uri image_to_download;
+    public String image_to_download;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -134,11 +138,48 @@ public class SlideshowFragment extends Fragment  {
                 if(resultCode == RESULT_OK){
                     Uri selectedImage = imageReturnedIntent.getData();
                     final ImageView gallery = getActivity().findViewById(R.id.iv_image);
-                    image_to_download = selectedImage;
+
+//                    try {
+//                        Bitmap bm = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
+//                        Log.d("si=", selectedImage.toString());
+//                        Log.d("bm=", bm.toString());
+//                        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+//                        bm.compress(Bitmap.CompressFormat.JPEG, 100, bao);
+//                        byte[] ba = bao.toByteArray();
+
+                        image_to_download = getPath(selectedImage);
+
+//                        image_to_download = Base64.encodeToString(ba,Base64.DEFAULT);
+//
+//
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+
+
                     gallery.setImageURI(selectedImage);
                 }
                 break;
         }
+
+    }
+
+    private String getPath(Uri uri){
+        Cursor cursor = getActivity().getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        String document_id = cursor.getString(0);
+
+        document_id = document_id.substring(document_id.lastIndexOf(":")+1);
+        cursor.close();
+
+        cursor = getActivity().getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                null, MediaStore.Images.Media._ID + " = ?", new String[]{document_id}, null
+        );
+        cursor.moveToFirst();
+        String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+        cursor.close();
+        return path;
     }
 
 
@@ -146,7 +187,7 @@ public class SlideshowFragment extends Fragment  {
         FragmentActivity root = getActivity();
         try {
             RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-            String URL = "http://192.168.100.4:3000/api/v1/posts/";
+            String URL = "http://192.168.100.3:3000/api/v1/posts/";
 
             JSONObject jsonBody = new JSONObject();
             final EditText et_body = getActivity().findViewById(R.id.et_body);
@@ -156,23 +197,18 @@ public class SlideshowFragment extends Fragment  {
             jsonBody.put("body", et_body.getText().toString());
             jsonBody.put("image", image_to_download);
 
-            JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.POST, URL, jsonBody,
-                    new Response.Listener<JSONObject>() {
+            SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, URL,
+                    new Response.Listener<String>() {
                         @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                if (response.getJSONArray("error") == null){
-                                    error_response = null;
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                Log.e("Something wrong", e.toString());
+                        public void onResponse(String response) {
+                            if (response == null){
+                                error_response = null;
                             }
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
-                        public void onErrorResponse(VolleyError error) {
+                        public void onErrorResponse(com.android.volley.error.VolleyError error) {
                             Log.d("Error response", error.toString());
                             Toast toast = Toast.makeText(getActivity().getApplicationContext(),
                                     error.toString(), Toast.LENGTH_LONG);
@@ -183,13 +219,19 @@ public class SlideshowFragment extends Fragment  {
                     }
             ){
                 @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
+                public Map<String, String> getHeaders() {
                     Map<String, String> headers = new HashMap<String, String>();
                     headers.put("Authorization", "Token token=" + ((MainActivity)getActivity()).final_token);
                     return headers;
                 }
             };
-            requestQueue.add(jsonRequest);
+
+            smr.addStringParam("title", et_title.getText().toString());
+            smr.addStringParam("body", et_body.getText().toString());
+            smr.addFile("image", image_to_download);
+            RequestQueue mRequestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
+            mRequestQueue.add(smr);
+
         } catch (JSONException e) {
             e.printStackTrace();
         }

@@ -17,8 +17,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
+
+import com.android.volley.error.VolleyError;
+import com.android.volley.request.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
@@ -97,7 +98,7 @@ public class LoginActivity extends AppCompatActivity {
 
         try {
             RequestQueue requestQueue = Volley.newRequestQueue(this);
-            String URL = "http://192.168.100.4:3000/api/v1/session/";
+            String URL = "http://192.168.100.3:3000/api/v1/session/";
 
             JSONObject jsonBody = new JSONObject();
 

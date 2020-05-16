@@ -17,19 +17,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
+import com.android.volley.error.VolleyError;
+import com.android.volley.request.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.purecitizen.R;
 
@@ -140,7 +134,7 @@ public class HomeFragment extends Fragment {
                 final_token = token;
 
                 posts_get();
-                setInitialData();
+                //setInitialData();
 
             } else {
                 String error = getActivity().getIntent().getStringExtra("error");
@@ -170,7 +164,7 @@ public class HomeFragment extends Fragment {
     }
     private void posts_get() {
         RequestQueue queue = Volley.newRequestQueue(getActivity());
-        String url = "http://192.168.100.4:3000/api/v1/posts/";
+        String url = "http://192.168.100.3:3000/api/v1/posts/";
         // Request a string response from the provided URL.
         Log.d("url=", url);
         try {
@@ -208,10 +202,11 @@ public class HomeFragment extends Fragment {
                     }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
+
                 }
             }){
                 @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
+                public Map<String, String> getHeaders() {
                     Map<String, String> headers = new HashMap<String, String>();
                     headers.put("Authorization", "Token token=" + final_token);
                     return headers;
