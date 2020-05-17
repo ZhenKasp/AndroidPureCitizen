@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -55,12 +56,13 @@ import java.util.Map;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import io.nlopez.smartlocation.OnLocationUpdatedListener;
+import io.nlopez.smartlocation.SmartLocation;
+
 import static com.android.volley.VolleyLog.TAG;
 
 
 public class HomeFragment extends Fragment {
-
-    private Context context;
 
     List<Post> posts = new ArrayList<>();
     protected String final_token;
@@ -70,12 +72,14 @@ public class HomeFragment extends Fragment {
         private String title;
         private String body;
         private Uri image;
+        private  String latitude_longitude;
 
-        public Post(String title, String body, Uri image){
+        public Post(String title, String body, Uri image, String latitude_longitude){
 
             this.title = title;
             this.body = body;
             this.image = image;
+            this.latitude_longitude = latitude_longitude;
         }
 
         public String getTitle() {
@@ -94,11 +98,13 @@ public class HomeFragment extends Fragment {
             this.body = body;
         }
 
-        public Uri getImage() {
-            return this.image;
-        }
+        public Uri getImage() { return this.image; }
 
         public void setImage(Uri image) { this.image = image; }
+
+        public String getLatitude_longitude() { return this.latitude_longitude; }
+
+        public void setLatitude_longitude(String  latitude_longitude) { this.latitude_longitude = latitude_longitude; }
     }
 
     class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
@@ -123,6 +129,8 @@ public class HomeFragment extends Fragment {
             Picasso.with(getContext()).load(post.getImage()).into(holder.imageView);
             holder.titleView.setText(post.getTitle());
             holder.bodyView.setText(post.getBody());
+            holder.latitudeLongitudeView.setText(post.getLatitude_longitude());
+
         }
 
         @Override
@@ -132,12 +140,13 @@ public class HomeFragment extends Fragment {
 
         public class ViewHolder extends RecyclerView.ViewHolder {
             final ImageView imageView;
-            final TextView titleView, bodyView;
+            final TextView titleView, bodyView, latitudeLongitudeView;
             ViewHolder(View view){
                 super(view);
                 imageView = (ImageView)view.findViewById(R.id.image);
                 titleView = (TextView) view.findViewById(R.id.title);
                 bodyView = (TextView) view.findViewById(R.id.body);
+                latitudeLongitudeView = (TextView) view.findViewById(R.id.latitude_longitude);
             }
         }
     }
@@ -192,12 +201,15 @@ public class HomeFragment extends Fragment {
                                     final String title = json_post.getString("title");
                                     final String body = json_post.getString("body");
                                     final Uri image_uri = Uri.parse(json_post.getString("image"));
+                                    final String latitude = json_post.getString("latitude");
+                                    final String longitude = json_post.getString("longitude");
+                                    final String final_location = latitude + " : " + longitude;
                                     Log.d("title=", title);
                                     Log.d("body=", body);
                                     Log.d("image=", image_uri.toString());
+                                    Log.d("latitude/longitude=", final_location);
 
-
-                                    posts.add(new Post (title, body, image_uri));
+                                    posts.add(new Post (title, body, image_uri, final_location));
 
                                     RecyclerView recyclerView = getActivity().findViewById(R.id.list);
                                     DataAdapter adapter = new DataAdapter(getActivity(), posts);

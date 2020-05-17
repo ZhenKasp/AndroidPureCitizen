@@ -3,6 +3,7 @@ package com.example.purecitizen.ui.slideshow;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -38,10 +39,15 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.nlopez.smartlocation.OnLocationUpdatedListener;
+import io.nlopez.smartlocation.SmartLocation;
+
 import static android.app.Activity.RESULT_OK;
 
 public class SlideshowFragment extends Fragment  {
 
+    Double latitude, longitude;
+    String final_location;
     String error_response = null;
     private static final int CAMERA_REQUEST = 1888;
     private ImageView imageView;
@@ -84,18 +90,8 @@ public class SlideshowFragment extends Fragment  {
                     final EditText et_title = getActivity().findViewById(R.id.et_title);
 
                     if (et_title.getText().toString() != null && et_body.getText().toString() != null && image_to_download != null) {
-
                         create_post();
 
-                        if (error_response == null){
-                            Toast toast = Toast.makeText(getActivity().getApplicationContext(),
-                                    "Post successfully created", Toast.LENGTH_LONG);
-                            LinearLayout toastContainer = (LinearLayout) toast.getView();
-                            toastContainer.setBackgroundColor(Color.GREEN);
-                            toast.show();
-
-                            go_to_home_fragment();
-                        }
                     } else {
                         Toast toast = Toast.makeText(getActivity(),"Поля заполнены неправильно", Toast.LENGTH_LONG);
                         LinearLayout toastContainer = (LinearLayout) toast.getView();
@@ -158,57 +154,72 @@ public class SlideshowFragment extends Fragment  {
     }
 
     private void create_post() {
-        FragmentActivity root = getActivity();
-        try {
-            RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-            String URL = "http://192.168.100.3:3000/api/v1/posts/";
+        String URL = "http://192.168.100.3:3000/api/v1/posts/";
 
-            JSONObject jsonBody = new JSONObject();
-            final EditText et_body = getActivity().findViewById(R.id.et_body);
-            final EditText et_title = getActivity().findViewById(R.id.et_title);
+        final EditText et_body = getActivity().findViewById(R.id.et_body);
+        final EditText et_title = getActivity().findViewById(R.id.et_title);
 
-            jsonBody.put("title", et_title.getText().toString());
-            jsonBody.put("body", et_body.getText().toString());
-            jsonBody.put("image", image_to_download);
-
-            SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, URL,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            if (response == null){
-                                error_response = null;
-                            }
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(com.android.volley.error.VolleyError error) {
-                            Log.d("Error response", error.toString());
+        final SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d("В ответ на создание", response.toString());
+                        if (response != null ) {
                             Toast toast = Toast.makeText(getActivity().getApplicationContext(),
-                                    error.toString(), Toast.LENGTH_LONG);
+                                    "Запрос создан успешно", Toast.LENGTH_LONG);
                             LinearLayout toastContainer = (LinearLayout) toast.getView();
-                            toastContainer.setBackgroundColor(Color.RED);
+                            toastContainer.setBackgroundColor(Color.GREEN);
                             toast.show();
+                            go_to_home_fragment();
                         }
                     }
-            ){
-                @Override
-                public Map<String, String> getHeaders() {
-                    Map<String, String> headers = new HashMap<String, String>();
-                    headers.put("Authorization", "Token token=" + ((MainActivity)getActivity()).final_token);
-                    return headers;
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(com.android.volley.error.VolleyError error) {
+                        Log.d("Error response", error.toString());
+                        Toast toast = Toast.makeText(getActivity().getApplicationContext(),
+                                error.toString(), Toast.LENGTH_LONG);
+                        LinearLayout toastContainer = (LinearLayout) toast.getView();
+                        toastContainer.setBackgroundColor(Color.RED);
+                        toast.show();
+                    }
                 }
-            };
+        ){
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Token token=" + ((MainActivity)getActivity()).final_token);
+                return headers;
+            }
+        };
 
-            smr.addStringParam("title", et_title.getText().toString());
-            smr.addStringParam("body", et_body.getText().toString());
-            smr.addFile("image", image_to_download);
-            RequestQueue mRequestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
-            mRequestQueue.add(smr);
+        SmartLocation.with(getContext()).location()
+                .start(new OnLocationUpdatedListener() {
+                    @Override
+                    public void onLocationUpdated(Location location) {
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+                        latitude = location.getLatitude();
+                        longitude = location.getLongitude();
+                        final_location = latitude + " : " + longitude;
+                        Log.d("final_location", final_location);
+                        if (final_location != "0.0 : 0.0") {
+                            smr.addStringParam("title", et_title.getText().toString());
+                            smr.addStringParam("body", et_body.getText().toString());
+                            smr.addFile("image", image_to_download);
+                            smr.addStringParam("latitude", String.valueOf(latitude));
+                            smr.addStringParam("longitude", String.valueOf(longitude));
+
+                            SmartLocation.with(getContext()).location().stop();
+
+                            RequestQueue mRequestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
+                            mRequestQueue.add(smr);
+                        }
+
+                    }
+                });
+
+
     }
 
     private  void go_to_home_fragment() {
