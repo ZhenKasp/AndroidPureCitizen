@@ -1,15 +1,15 @@
 package com.example.purecitizen;
 
-import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
-
 import androidx.core.view.GravityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -52,11 +52,13 @@ public class MainActivity extends AppCompatActivity {
         try {
             String token = getIntent().getStringExtra("token");
             if (token != null) {
-                Log.d("token", token);
                 final_token = token;
             } else {
                 String error = getIntent().getStringExtra("error");
-                Log.e("Something wrong", error);
+                Toast toast = Toast.makeText(this, error, Toast.LENGTH_SHORT);
+                LinearLayout toastContainer = (LinearLayout) toast.getView();
+                toastContainer.setBackgroundColor(Color.RED);
+                toast.show();
             }
         } catch (Exception e) {
             e.printStackTrace();

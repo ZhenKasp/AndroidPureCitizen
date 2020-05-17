@@ -3,7 +3,6 @@ package com.example.purecitizen;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
@@ -11,17 +10,13 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-
 import com.android.volley.error.VolleyError;
 import com.android.volley.request.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -68,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
         if(!emailInput.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(emailInput).matches()){
             return true;
         } else {
-            Toast toast = Toast.makeText(this, "Invalid Email Address!", Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(this, "Неправильный емаил!", Toast.LENGTH_SHORT);
             LinearLayout toastContainer = (LinearLayout) toast.getView();
             toastContainer.setBackgroundColor(Color.RED);
             toast.show();
@@ -78,10 +73,10 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean validatePassword(EditText password) {
         String passwordInput = password.getText().toString();
-        if(!passwordInput.isEmpty() && passwordInput.length() >= 6){
+        if(passwordInput.length() >= 6){
             return true;
         } else {
-            Toast toast = Toast.makeText(this, "Invalid Password!", Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(this, "Пароль не может быть меньше 6 символов!", Toast.LENGTH_SHORT);
             LinearLayout toastContainer = (LinearLayout) toast.getView();
             toastContainer.setBackgroundColor(Color.RED);
             toast.show();
@@ -110,7 +105,6 @@ public class LoginActivity extends AppCompatActivity {
                             try {
                                 if (response.getString("token") != null ) {
                                     token = response.getString("token");
-                                    Log.d("token = ", token);
                                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                     intent.putExtra("token", token);
 
@@ -119,7 +113,7 @@ public class LoginActivity extends AppCompatActivity {
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 Toast toast = Toast.makeText(getApplicationContext(),
-                                        "Wrong email or password", Toast.LENGTH_LONG);
+                                        "Неправильный емаил или пароль", Toast.LENGTH_LONG);
                                 LinearLayout toastContainer = (LinearLayout) toast.getView();
                                 toastContainer.setBackgroundColor(Color.RED);
                                 toast.show();
@@ -129,7 +123,6 @@ public class LoginActivity extends AppCompatActivity {
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Log.d("Error response", error.toString());
                             Toast toast = Toast.makeText(getApplicationContext(),
                                     "TimeoutError", Toast.LENGTH_LONG);
                             LinearLayout toastContainer = (LinearLayout) toast.getView();

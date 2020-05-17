@@ -17,49 +17,33 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-
 import com.android.volley.request.SimpleMultiPartRequest;
-
 import com.android.volley.toolbox.Volley;
 import com.example.purecitizen.MainActivity;
 import com.example.purecitizen.R;
 import com.example.purecitizen.ui.home.HomeFragment;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
-
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
-
 import static android.app.Activity.RESULT_OK;
 
 public class SlideshowFragment extends Fragment  {
 
     Double latitude, longitude;
     String final_location;
-    String error_response = null;
-    private static final int CAMERA_REQUEST = 1888;
-    private ImageView imageView;
-    private static final int MY_CAMERA_PERMISSION_CODE = 100;
-    static final int GALLERY_REQUEST = 1;
     public String image_to_download;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_slideshow, container, false);
-        final EditText et_body = getActivity().findViewById(R.id.et_body);
-        final EditText et_title = getActivity().findViewById(R.id.et_title);
+
         final Button btn_submit = root.findViewById(R.id.btn_submit);
         final ImageButton camera = root.findViewById(R.id.btn_image);
         final ImageView gallery = root.findViewById(R.id.iv_image);
@@ -107,7 +91,6 @@ public class SlideshowFragment extends Fragment  {
                 }
             }
         });
-
         return root;
     }
 
@@ -158,12 +141,10 @@ public class SlideshowFragment extends Fragment  {
 
         final EditText et_body = getActivity().findViewById(R.id.et_body);
         final EditText et_title = getActivity().findViewById(R.id.et_title);
-
         final SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, URL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Log.d("В ответ на создание", response.toString());
                         if (response != null ) {
                             Toast toast = Toast.makeText(getActivity().getApplicationContext(),
                                     "Запрос создан успешно", Toast.LENGTH_LONG);
@@ -177,7 +158,6 @@ public class SlideshowFragment extends Fragment  {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(com.android.volley.error.VolleyError error) {
-                        Log.d("Error response", error.toString());
                         Toast toast = Toast.makeText(getActivity().getApplicationContext(),
                                 error.toString(), Toast.LENGTH_LONG);
                         LinearLayout toastContainer = (LinearLayout) toast.getView();
@@ -202,7 +182,6 @@ public class SlideshowFragment extends Fragment  {
                         latitude = location.getLatitude();
                         longitude = location.getLongitude();
                         final_location = latitude + " : " + longitude;
-                        Log.d("final_location", final_location);
                         if (final_location != "0.0 : 0.0") {
                             smr.addStringParam("title", et_title.getText().toString());
                             smr.addStringParam("body", et_body.getText().toString());
@@ -218,8 +197,6 @@ public class SlideshowFragment extends Fragment  {
 
                     }
                 });
-
-
     }
 
     private  void go_to_home_fragment() {
