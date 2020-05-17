@@ -3,8 +3,14 @@ package com.example.purecitizen.ui.home;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,16 +31,31 @@ import com.android.volley.Response;
 import com.android.volley.error.VolleyError;
 import com.android.volley.request.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.purecitizen.MainActivity;
 import com.example.purecitizen.R;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import static com.android.volley.VolleyLog.TAG;
 
 
 public class HomeFragment extends Fragment {
@@ -48,11 +69,11 @@ public class HomeFragment extends Fragment {
 
         private String title;
         private String body;
-        private int image;
+        private Uri image;
 
-        public Post(String title, String body, int image){
+        public Post(String title, String body, Uri image){
 
-            this.title=title;
+            this.title = title;
             this.body = body;
             this.image = image;
         }
@@ -73,13 +94,11 @@ public class HomeFragment extends Fragment {
             this.body = body;
         }
 
-        public int getImage() {
+        public Uri getImage() {
             return this.image;
         }
 
-        public void setImage(int image) {
-            this.image = image;
-        }
+        public void setImage(Uri image) { this.image = image; }
     }
 
     class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
@@ -101,7 +120,7 @@ public class HomeFragment extends Fragment {
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             Post post = posts.get(position);
-            holder.imageView.setImageResource(post.getImage());
+            Picasso.with(getContext()).load(post.getImage()).into(holder.imageView);
             holder.titleView.setText(post.getTitle());
             holder.bodyView.setText(post.getBody());
         }
@@ -134,7 +153,6 @@ public class HomeFragment extends Fragment {
                 final_token = token;
 
                 posts_get();
-                //setInitialData();
 
             } else {
                 String error = getActivity().getIntent().getStringExtra("error");
@@ -151,17 +169,6 @@ public class HomeFragment extends Fragment {
 
     }
 
-    private void setInitialData(){
-        posts.add(new Post ("1", "12adadadasew rw w rqwwrrdadaggda3", R.drawable.image1));
-        posts.add(new Post ("2", "45asfasfaf aw dafdfaf fdfadf6", R.drawable.image2));
-        posts.add(new Post ("3", "examzczczcrxgafdagdadfafdple", R.drawable.image3));
-        posts.add(new Post ("4", "examagfga wr gaadgasdadafple", R.drawable.image4));
-        posts.add(new Post ("5", "exaafasdfawra sfsad fafdfmple", R.drawable.image5));
-        posts.add(new Post ("6", "exaasfaswra sffasddasdfaetwample", R.drawable.image6));
-        posts.add(new Post ("7", "exasdafadfadfad dfafdwer adsfmple", R.drawable.image7));
-
-
-    }
     private void posts_get() {
         RequestQueue queue = Volley.newRequestQueue(getActivity());
         String url = "http://192.168.100.3:3000/api/v1/posts/";
@@ -182,11 +189,15 @@ public class HomeFragment extends Fragment {
 
                                     JSONObject json_post = json_posts.getJSONObject(x);
                                     Log.d("post=", json_post.toString());
-                                    String title = json_post.getString("title");
-                                    String body = json_post.getString("body");
+                                    final String title = json_post.getString("title");
+                                    final String body = json_post.getString("body");
+                                    final Uri image_uri = Uri.parse(json_post.getString("image"));
                                     Log.d("title=", title);
                                     Log.d("body=", body);
-                                    posts.add(new Post (title, body, R.drawable.gif2));
+                                    Log.d("image=", image_uri.toString());
+
+
+                                    posts.add(new Post (title, body, image_uri));
 
                                     RecyclerView recyclerView = getActivity().findViewById(R.id.list);
                                     DataAdapter adapter = new DataAdapter(getActivity(), posts);
@@ -217,4 +228,25 @@ public class HomeFragment extends Fragment {
             Log.e("Some error", e.toString());
         }
     }
+
+    private Bitmap getImageBitmap(String url) {
+        Bitmap bm = null;
+        try {
+            URL aURL = new URL(url);
+            URLConnection conn = aURL.openConnection();
+            conn.connect();
+            InputStream is = conn.getInputStream();
+            BufferedInputStream bis = new BufferedInputStream(is);
+            bm = BitmapFactory.decodeStream(bis);
+            bis.close();
+            is.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Error getting bitmap", e);
+        }
+        return bm;
+    }
+
+
+
+
 }
