@@ -54,7 +54,6 @@ public class RegistrationActivity extends AppCompatActivity {
             }
         });
 
-
         registration_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -65,12 +64,9 @@ public class RegistrationActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 }
-
             }
         });
-
     }
-
 
     private boolean validateEmailAddress(EditText email) {
         String emailInput = email.getText().toString();
@@ -123,7 +119,6 @@ public class RegistrationActivity extends AppCompatActivity {
             return false;
         }
     }
-
 
     private void registration()
     {

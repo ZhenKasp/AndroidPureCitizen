@@ -30,7 +30,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private String token = null;
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,7 +75,6 @@ public class LoginActivity extends AppCompatActivity {
             return false;
         }
     }
-
 
     private boolean validatePassword(EditText password) {
         String passwordInput = password.getText().toString();

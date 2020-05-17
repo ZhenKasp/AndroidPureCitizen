@@ -1,17 +1,11 @@
 package com.example.purecitizen.ui.slideshow;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,7 +37,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -130,6 +123,7 @@ public class SlideshowFragment extends Fragment  {
                 if(resultCode == RESULT_OK){
                     Uri selectedImage = imageReturnedIntent.getData();
                     final ImageButton camera = getActivity().findViewById(R.id.btn_image);
+                    image_to_download = getPath(selectedImage);
                     camera.setImageURI(selectedImage);
                 }
 
@@ -139,29 +133,10 @@ public class SlideshowFragment extends Fragment  {
                     Uri selectedImage = imageReturnedIntent.getData();
                     final ImageView gallery = getActivity().findViewById(R.id.iv_image);
 
-//                    try {
-//                        Bitmap bm = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
-//                        Log.d("si=", selectedImage.toString());
-//                        Log.d("bm=", bm.toString());
-//                        ByteArrayOutputStream bao = new ByteArrayOutputStream();
-//                        bm.compress(Bitmap.CompressFormat.JPEG, 100, bao);
-//                        byte[] ba = bao.toByteArray();
-
-                        image_to_download = getPath(selectedImage);
-
-//                        image_to_download = Base64.encodeToString(ba,Base64.DEFAULT);
-//
-//
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-
-
                     gallery.setImageURI(selectedImage);
                 }
                 break;
         }
-
     }
 
     private String getPath(Uri uri){
@@ -181,7 +156,6 @@ public class SlideshowFragment extends Fragment  {
         cursor.close();
         return path;
     }
-
 
     private void create_post() {
         FragmentActivity root = getActivity();
